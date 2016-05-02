@@ -22,23 +22,29 @@ tmr.alarm(2, 1000, 1, function()
         print("Connected to MQTT: "..BROKER_IP..":"..BROKER_PORT.." as "..CLIENT_ID)
         TEMP = readData()
 
-        -- Publish a first time the data
-        DATA = '{"temp":"'..TEMP..'"}'
-        m:publish(TOPIC, DATA, 0, 0, function(conn)
-            print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
-          end)
+        if(TEMP < 80) then
+            -- Publish a first time the data
+            DATA = '{"mac":"'..wifi.sta.getmac()..'", "ip":"'..wifi.sta.getip()..'",'
+            DATA = DATA..'"temp":"'..TEMP..'"}'
+            m:publish(TOPIC, DATA, 0, 0, function(conn)
+                print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
+              end)
+          end
 
         -- Check every 5s for values change
         tmr.alarm(1, REFRESH_RATE, 1, function()
           TMP_TEMP = readData()
-            if(TEMP ~= TMP_TEMP or PRES ~= TMP_PRES) then
-              DATA = '{"temp":"'..TMP_TEMP..'"}'
-              -- Publish a message (QoS = 0, retain = 0)
-              m:publish(TOPIC, DATA, 0, 0, function(conn)
-                  print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
-                end)
-            else
-              print("No change in value, no data send to broker.")
+            if(TEMP ~= TMP_TEMP or PRES ~= TMP_PRES) then            
+                if(TMP_TEMP < 80) then
+                  DATA = '{"mac":"'..wifi.sta.getmac()..'", "ip":"'..wifi.sta.getip()..'",'
+                  DATA = DATA..'"temp":"'..TMP_TEMP..'"}'
+                  -- Publish a message (QoS = 0, retain = 0)
+                  m:publish(TOPIC, DATA, 0, 0, function(conn)
+                      print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
+                    end)
+                else
+                  print("No change in value, no data send to broker.")
+                end
             end
           end)
       end)
