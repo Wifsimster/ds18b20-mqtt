@@ -19,3 +19,4 @@ MQTT client publising DS18B20 data to a MQTT broker each time data changes.
 
 ## Scheme
 
+![scheme](https://github.com/Wifsimster/ds18b20-mqtt/blob/master/scheme.png)
