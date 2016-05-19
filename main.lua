@@ -1,4 +1,5 @@
 require('config')
+local ntp = require('ntp')
 
 TOPIC = "/sensors/"..LOCATION.."/bs18b20/data"
 
@@ -16,18 +17,22 @@ end
 -- Init client with keepalive timer 120sec
 m = mqtt.Client(CLIENT_ID, 120, "", "")
 
+-- Sync to NTP server
+ntp.sync()
+            
 print("Connecting to MQTT: "..BROKER_IP..":"..BROKER_PORT.."...")
 m:connect(BROKER_IP, BROKER_PORT, 0, 1, function(conn)
     print("Connected to MQTT: "..BROKER_IP..":"..BROKER_PORT.." as "..CLIENT_ID)
     tmr.alarm(1, REFRESH_RATE, 1, function()
        local temperature = readData()
         if(temperature < 80) then
-            DATA = '{"mac":"'..wifi.sta.getmac()..'", "ip":"'..wifi.sta.getip()..'",'
+            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..wifi.sta.getip()..'",'
+            DATA = DATA..'"date":"'..ntp.date()..'","time":"'..ntp.time()..'",'
             DATA = DATA..'"temp":"'..temperature..'"}'              
             m:publish(TOPIC, DATA, 0, 0, function(conn)
                 print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
             end)
         collectgarbage()
     end
-  end)        
+  end)
 end)
