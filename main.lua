@@ -17,7 +17,10 @@ end
 -- Init client with keepalive timer 120sec
 m = mqtt.Client(CLIENT_ID, 120, "", "")
 
--- Sync to NTP server
+ip = wifi.sta.getip()
+
+m:lwt("/offline", '{"message":"'..CLIENT_ID..'", "topic":"'..TOPIC..'", "ip":"'..ip..'"}', 0, 0)
+
 ntp.sync()
             
 print("Connecting to MQTT: "..BROKER_IP..":"..BROKER_PORT.."...")
@@ -26,7 +29,7 @@ m:connect(BROKER_IP, BROKER_PORT, 0, 1, function(conn)
     tmr.alarm(1, REFRESH_RATE, 1, function()
        local temperature = readData()
         if(temperature < 80) then
-            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..wifi.sta.getip()..'",'
+            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..ip..'",'
             DATA = DATA..'"date":"'..ntp.date()..'","time":"'..ntp.time()..'",'
             DATA = DATA..'"temp":"'..temperature..'"}'              
             m:publish(TOPIC, DATA, 0, 0, function(conn)
