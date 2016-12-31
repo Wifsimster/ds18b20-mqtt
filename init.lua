@@ -10,7 +10,7 @@ print('MAC address:', wifi.sta.getmac())
 
 if (wifi.getmode() == wifi.STATION) then
     local joinCounter = 0
-    local joinMaxAttempts = 5
+    local joinMaxAttempts = 50
     tmr.alarm(0, 3000, 1, function()
        local ip = wifi.sta.getip()
        if ip == nil and joinCounter < joinMaxAttempts then

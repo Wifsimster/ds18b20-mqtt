@@ -1,7 +1,6 @@
 require('config')
-local ntp = require('ntp')
 
-TOPIC = "/sensors/"..LOCATION.."/bs18b20/data"
+TOPIC = "/sensors/bs18b20/data"
 
 function readData() 
   local ds18b20 = require('ds18b20')
@@ -20,18 +19,26 @@ m = mqtt.Client(CLIENT_ID, 120, "", "")
 ip = wifi.sta.getip()
 
 m:lwt("/offline", '{"message":"'..CLIENT_ID..'", "topic":"'..TOPIC..'", "ip":"'..ip..'"}', 0, 0)
-
-ntp.sync()
             
 print("Connecting to MQTT: "..BROKER_IP..":"..BROKER_PORT.."...")
 m:connect(BROKER_IP, BROKER_PORT, 0, 1, function(conn)
     print("Connected to MQTT: "..BROKER_IP..":"..BROKER_PORT.." as "..CLIENT_ID)
+
+    local temperature = readData()
+        if(temperature < 80) then
+            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..ip..'","refresh":"'..REFRESH_RATE..'",'
+            DATA = DATA..'"temperature":"'..temperature..'"}'              
+            m:publish(TOPIC, DATA, 0, 0, function(conn)
+                print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
+            end)
+        collectgarbage()
+        end
+        
     tmr.alarm(1, REFRESH_RATE, 1, function()
        local temperature = readData()
         if(temperature < 80) then
-            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..ip..'",'
-            DATA = DATA..'"date":"'..ntp.date()..'","time":"'..ntp.time()..'",'
-            DATA = DATA..'"temp":"'..temperature..'"}'              
+            DATA = '{"mac":"'..wifi.sta.getmac()..'","ip":"'..ip..'","refresh":"'..REFRESH_RATE..'",'
+            DATA = DATA..'"temperature":"'..temperature..'"}'              
             m:publish(TOPIC, DATA, 0, 0, function(conn)
                 print(CLIENT_ID.." sending data: "..DATA.." to "..TOPIC)
             end)
