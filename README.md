@@ -6,7 +6,7 @@ This LUA script is for ESP8266 hardware.
 
 MQTT client publising DS18B20 data to a MQTT broker each time data changes.
 
-##Files
+## Files
 * ``config.lua``: Configuration variables
 * ``init.lua``: Connect to a wifi AP and then execute main.lua file
 * ``main.lua``: Main file
