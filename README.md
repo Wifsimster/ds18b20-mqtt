@@ -1,6 +1,6 @@
-# Send DS18B20 data through an ESP8266 to a MQTT broker
+# DS18B20
 
-This LUA script is for ESP8266 hardware.
+> This LUA script is for ESP8266 hardware.
 
 ## Description
 
